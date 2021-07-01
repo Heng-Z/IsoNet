@@ -1,8 +1,8 @@
 from IsoNet.models.unet import builder,builder_fullconv,builder_fullconv_old
-from tensorflow.keras.layers import Input,Add,Activation
-from tensorflow.keras.models import Model
-from IsoNet.losses.wedge_power import wedge_power_gain
-from tensorflow.keras.optimizers import Adam
+from keras.layers import Input,Add,Activation
+from keras.models import Model
+# from IsoNet.losses.wedge_power import wedge_power_gain
+from keras.optimizers import Adam
 def Unet(filter_base=32,
         depth=2,
         convs_per_depth=3,
@@ -46,7 +46,7 @@ def Unet(filter_base=32,
     model = Model(inputs=inputs, outputs=outputs)
     optimizer = Adam(lr=lr)
     if loss == 'mae' or loss == 'mse':
-        metrics = ('mse', 'mae')
+        metrics = ['mse', 'mae']
 
     model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     return model

@@ -1,6 +1,6 @@
 from IsoNet.models.unet.blocks import conv_blocks
-from tensorflow.keras.layers import MaxPooling2D, UpSampling2D, MaxPooling3D, UpSampling3D, AveragePooling3D
-from tensorflow.keras.layers import Concatenate
+from keras.layers import MaxPooling2D, UpSampling2D, MaxPooling3D, UpSampling3D, AveragePooling3D
+from keras.layers import Concatenate
 
 def build_unet(filter_base=32,depth=2,convs_per_depth=2,
                kernel=(3,3),

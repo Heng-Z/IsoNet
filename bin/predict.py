@@ -10,17 +10,19 @@ from IsoNet.util.image import *
 from IsoNet.util.metadata import MetaData,Label,Item
 from IsoNet.util.dict2attr import idx2list
 from tqdm import tqdm
+import keras 
+
 def predict(args):
 
-    if args.log_level == 'debug':
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
-    else:
-        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-    import tensorflow as tf
+    # if args.log_level == 'debug':
+    #     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
+    # else:
+    #     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+    # import tensorflow as tf
 
-    import logging
-    tf_logger = tf.get_logger()
-    tf_logger.setLevel(logging.ERROR)
+    # import logging
+    # tf_logger = tf.get_logger()
+    # tf_logger.setLevel(logging.ERROR)
 
     logger = logging.getLogger('predict')
     if args.log_level == "debug":
@@ -44,11 +46,10 @@ def predict(args):
 
     logger.info('gpuID:{}'.format(args.gpuID))
     if ngpus >1:
-        strategy = tf.distribute.MirroredStrategy()
-        with strategy.scope():
-            model = tf.keras.models.load_model(args.model)
-    else:
-        model = tf.keras.models.load_model(args.model)
+
+        model = keras.models.load_model(args.model)
+        model = keras.utils.multi_gpu_model(model, gpus=ngpus, cpu_merge=True, cpu_relocation=False)
+
 
     logger.info("Loaded model from disk")
 

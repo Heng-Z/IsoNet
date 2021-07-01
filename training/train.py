@@ -1,16 +1,15 @@
-import tensorflow as tf
 import logging
-tf.get_logger().setLevel(logging.ERROR)
-from tensorflow.keras.layers import Activation, Add, Input, Conv2D, Conv3D
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.utils import Sequence
+from keras.layers import Activation, Add, Input, Conv2D, Conv3D
+from keras.models import Model
+from keras.optimizers import Adam
+from keras.utils import Sequence
 from IsoNet.training.data_sequence import prepare_dataseq
 from IsoNet.models.unet.model import Unet
-from IsoNet.losses.losses import loss_mae,loss_mse
+# from IsoNet.losses.losses import loss_mae,loss_mse
 import numpy as np
-from tensorflow.keras.models import model_from_json,load_model, clone_model
+from keras.models import model_from_json,load_model, clone_model
 import os
+from keras.utils import multi_gpu_model
 
 
 def train3D_seq(outFile,
@@ -40,9 +39,7 @@ def train3D_seq(outFile,
     #     _metrics = ['accuracy']
 
 
-    strategy = tf.distribute.MirroredStrategy()
     if n_gpus > 1:
-        with strategy.scope(): 
             model = Unet(filter_base=filter_base, 
                 depth=depth, 
                 convs_per_depth=convs_per_depth,
@@ -55,20 +52,20 @@ def train3D_seq(outFile,
                 loss = loss,
                 lr = lr)
             # model.compile(optimizer=optimizer, loss=loss, metrics=_metrics)
-    else:
-        model = Unet(filter_base=filter_base, 
-            depth=depth, 
-            convs_per_depth=convs_per_depth,
-            kernel=kernel,
-            batch_norm=batch_norm, 
-            dropout=dropout,
-            pool=pool,
-            residual = residual,
-            last_activation = last_activation,
-            loss = loss,
-            lr = lr)
+    # else:
+    #     model = Unet(filter_base=filter_base, 
+    #         depth=depth, 
+    #         convs_per_depth=convs_per_depth,
+    #         kernel=kernel,
+    #         batch_norm=batch_norm, 
+    #         dropout=dropout,
+    #         pool=pool,
+    #         residual = residual,
+    #         last_activation = last_activation,
+    #         loss = loss,
+    #         lr = lr)
         # model.compile(optimizer=optimizer, loss=loss, metrics=_metrics)
-    print(model.summary())
+    # print(model.summary())
     train_data, test_data = prepare_dataseq(data_dir, batch_size)
     print('**train data size**',len(train_data))
     callback_list = []
@@ -116,16 +113,16 @@ def train3D_continue(outFile,
     # optimizer = Adam(lr=lr)
     
     # model = load_model( model_file) # weight is a model
-    strategy = tf.distribute.MirroredStrategy()
+    # strategy = tf.distribute.MirroredStrategy()
     # train_data = strategy.experimental_distribute_dataset(train_data)
     # test_data = strategy.experimental_distribute_dataset(test_data)
     if n_gpus > 1:
-        with strategy.scope():
-            model = load_model( model_file)
-    else:
         model = load_model( model_file)
+        model = multi_gpu_model(model, gpus=n_gpus, cpu_merge=True, cpu_relocation=False)
+    # else:
+    #     model = load_model( model_file)
     optimizer = Adam(lr=lr)
-    model.compile(optimizer=optimizer, loss='mae', metrics=('mse','mae'))
+    model.compile(optimizer=optimizer, loss='mae', metrics=['mse','mae'])
     # model.compile(optimizer=optimizer, loss='mae', metrics=_metrics)
     logging.info("Loaded model from disk")
 
@@ -142,18 +139,20 @@ def train3D_continue(outFile,
     # callback_list.append(tensor_board)
     logging.info("begin fitting")
     train_data, test_data= prepare_dataseq(data_dir, batch_size)
-    train_data = tf.data.Dataset.from_generator(train_data,output_types=(tf.float32,tf.float32))
-    test_data = tf.data.Dataset.from_generator(test_data,output_types=(tf.float32,tf.float32))
-    history = model.fit(train_data, validation_data=test_data,
-                                  epochs=epochs, steps_per_epoch=steps_per_epoch,validation_steps=np.ceil(0.1*steps_per_epoch),
+    # train_data = tf.data.Dataset.from_generator(train_data,output_types=(tf.float32,tf.float32))
+    # test_data = tf.data.Dataset.from_generator(test_data,output_types=(tf.float32,tf.float32))
+    history = model.fit_generator(generator=train_data, validation_data=test_data,
+                                  epochs=epochs, steps_per_epoch=steps_per_epoch,
                                   verbose=1)
+                                  
                                 #   callbacks=callback_list)
     # if n_gpus>1:
     #     model_from_multimodel = model.get_layer('model_1')   
     #     model_from_multimodel.compile(optimizer=optimizer, loss='mae', metrics=_metrics)
     #     model_from_multimodel.save(outFile)
     # else:
-    model.save(outFile)
+    single_model = model.get_layer('model_1')
+    single_model.save(outFile)
     return history
 
 def prepare_first_model(settings):

@@ -1,5 +1,5 @@
-from tensorflow.keras.layers import Dropout, Activation, BatchNormalization, Conv2D, Conv3D, LeakyReLU,Conv3DTranspose,Concatenate
-from tensorflow.keras.initializers import RandomNormal
+from keras.layers import Dropout, Activation, BatchNormalization, Conv2D, Conv3D, LeakyReLU,Conv3DTranspose,Concatenate
+from keras.initializers import RandomNormal
 
 def conv_blocks(n_filter, kernel=(3,3,3),
                 activation="relu",

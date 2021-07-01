@@ -1,16 +1,16 @@
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 import mrcfile
 from IsoNet.preprocessing.img_processing import normalize
 import numpy as np
-import tensorflow.keras.backend as K
-import tensorflow as tf
+import keras.backend as K
+# import tensorflow as tf
 
 def predict(settings):    
     # model = load_model('{}/model_iter{:0>2d}.h5'.format(settings.result_dir,settings.iter_count+1))
-    strategy = tf.distribute.MirroredStrategy()
     if settings.ngpus >1:
-        with strategy.scope():
-            model = load_model('{}/model_iter{:0>2d}.h5'.format(settings.result_dir,settings.iter_count))
+        from keras.utils import multi_gpu_model
+        model = load_model('{}/model_iter{:0>2d}.h5'.format(settings.result_dir,settings.iter_count))
+        model = multi_gpu_model(model, gpus=settings.ngpus, cpu_merge=True, cpu_relocation=False)
     else:
         model = load_model('{}/model_iter{:0>2d}.h5'.format(settings.result_dir,settings.iter_count))
     N = settings.predict_batch_size 

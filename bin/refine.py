@@ -108,16 +108,16 @@ def run_whole(args):
         raise RuntimeError('No GPU detected, Please check your CUDA version and installation')
 
     #import tensorflow related modules after setting environment
-    import tensorflow as tf
+    # import tensorflow as tf
 
-    gpu_info =  tf.config.list_physical_devices('GPU')
-    logging.debug(gpu_info)   
-    if len(gpu_info)!=args.ngpus:
-        if len(gpu_info) == 0:
-            logging.error('No GPU detected, Please check your CUDA version and installation')
-            raise RuntimeError('No GPU detected, Please check your CUDA version and installation')
-        else:
-            logging.error('Available number of GPUs don\'t match requested GPUs \n\n Detected GPUs: {} \n\n Requested GPUs: {}'.format(gpu_info,args.gpuID))
+    # gpu_info =  tf.config.list_physical_devices('GPU')
+    # logging.debug(gpu_info)   
+    # if len(gpu_info)!=args.ngpus:
+    #     if len(gpu_info) == 0:
+    #         logging.error('No GPU detected, Please check your CUDA version and installation')
+    #         raise RuntimeError('No GPU detected, Please check your CUDA version and installation')
+    #     else:
+    #         logging.error('Available number of GPUs don\'t match requested GPUs \n\n Detected GPUs: {} \n\n Requested GPUs: {}'.format(gpu_info,args.gpuID))
             
     from IsoNet.training.predict import predict
     from IsoNet.training.train import prepare_first_model, train_data

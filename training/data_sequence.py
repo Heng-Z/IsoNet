@@ -1,4 +1,4 @@
-from tensorflow.keras.utils import Sequence
+from keras.utils import Sequence
 import numpy as np
 import mrcfile
 import os
@@ -29,20 +29,31 @@ class dataSequence(Sequence):
         return rx,ry
 
 
-def prepare_dataseq(data_folder, batch_size):
+# def prepare_dataseq(data_folder, batch_size):
 
+#     dirs_tomake = ['train_x','train_y', 'test_x', 'test_y']
+#     path_all = []
+#     for d in dirs_tomake:
+#         p = '{}/{}/'.format(data_folder, d)
+#         path_all.append(sorted([p+f for f in os.listdir(p)]))
+#     # train_data = dataSequence(path_all[0], path_all[1], batch_size)
+#     # test_data = dataSequence(path_all[2], path_all[3], batch_size)
+#     train_data = get_gen(path_all[0], path_all[1], batch_size)
+#     test_data = get_gen(path_all[2], path_all[3], batch_size)
+#     # print(path_all[2],path_all[3])
+#     return train_data, test_data
+
+def prepare_dataseq(data_folder, batch_size):
+    import os
     dirs_tomake = ['train_x','train_y', 'test_x', 'test_y']
     path_all = []
     for d in dirs_tomake:
         p = '{}/{}/'.format(data_folder, d)
         path_all.append(sorted([p+f for f in os.listdir(p)]))
-    # train_data = dataSequence(path_all[0], path_all[1], batch_size)
-    # test_data = dataSequence(path_all[2], path_all[3], batch_size)
-    train_data = get_gen(path_all[0], path_all[1], batch_size)
-    test_data = get_gen(path_all[2], path_all[3], batch_size)
-    # print(path_all[2],path_all[3])
+    train_data = dataSequence(path_all[0], path_all[1], batch_size)
+    test_data = dataSequence(path_all[2], path_all[3], batch_size)
     return train_data, test_data
-
+    
 def get_gen(x_set,y_set,batch_size,shuffle=True):
     def gen():
         while True:
