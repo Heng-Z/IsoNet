@@ -47,6 +47,9 @@ def extract_subtomos(settings):
     '''
     #mkfolder(settings.result_dir)
     #mkfolder(settings.subtomo_dir)
+    
+    #  fix the normalize_percentile to True
+    settings.normalize_percentile = True
     md = MetaData()
     md.read(settings.star_file)
     if len(md)==0:
