@@ -77,7 +77,7 @@ def extract_subtomos(settings):
 
             seeds=create_cube_seeds(orig_data, it.rlnNumberSubtomo, settings.crop_size,mask=mask_data)
             # globally normalize the tomogram;
-            tomo_glb_norm = normalize(-orig_data) # float32
+            tomo_glb_norm = normalize(-orig_data,percentile=settings.normalize_percentile) # float32
             subtomos=crop_cubes(tomo_glb_norm,seeds,settings.crop_size)
 
             # save sampled subtomo to {results_dir}/subtomos instead of subtomo_dir (as previously does)
