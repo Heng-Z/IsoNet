@@ -34,12 +34,11 @@ def generate_first_iter_mrc(mrc,settings):
     root_name = mrc.split('/')[-1].split('.')[0]
     extension = mrc.split('/')[-1].split('.')[1]
     with mrcfile.open(mrc) as mrcData:
-        orig_data = normalize(mrcData.data.astype(np.float32)*-1, percentile = settings.normalize_percentile)
+        orig_data = mrcData.data.astype(np.float32)
     orig_data = apply_wedge(orig_data, ld1=1, ld2=0)
-    orig_data = normalize(orig_data, percentile = settings.normalize_percentile)
 
     with mrcfile.new('{}/{}_iter00.{}'.format(settings.result_dir,root_name, extension), overwrite=True) as output_mrc:
-        output_mrc.set_data(-orig_data)
+        output_mrc.set_data(orig_data)
 
 def extract_subtomos(settings):
     '''
@@ -77,7 +76,9 @@ def extract_subtomos(settings):
                 logging.info(" mask not been used for tomogram {}!".format(it.rlnIndex))
 
             seeds=create_cube_seeds(orig_data, it.rlnNumberSubtomo, settings.crop_size,mask=mask_data)
-            subtomos=crop_cubes(orig_data,seeds,settings.crop_size)
+            # globally normalize the tomogram;
+            tomo_glb_norm = normalize(-orig_data) # float32
+            subtomos=crop_cubes(tomo_glb_norm,seeds,settings.crop_size)
 
             # save sampled subtomo to {results_dir}/subtomos instead of subtomo_dir (as previously does)
             base_name = os.path.splitext(os.path.basename(it.rlnMicrographName))[0]
@@ -145,15 +146,15 @@ def get_cubes(inp,settings):
     current_mrc = '{}/{}_iter{:0>2d}.mrc'.format(settings.result_dir,root_name,settings.iter_count-1)
 
     with mrcfile.open(current_mrc) as mrcData:
-        ow_data = mrcData.data.astype(np.float32)*-1
-    ow_data = normalize(ow_data, percentile = settings.normalize_percentile)
+        ow_data = mrcData.data.astype(np.float32)
+    # ow_data = normalize(ow_data, percentile = settings.normalize_percentile)
     with mrcfile.open('{}/{}_iter00.mrc'.format(settings.result_dir,root_name)) as mrcData:
         iw_data = mrcData.data.astype(np.float32)*-1
-    iw_data = normalize(iw_data, percentile = settings.normalize_percentile)
+    # iw_data = normalize(iw_data, percentile = settings.normalize_percentile)
 
     if settings.iter_count <= settings.iterations:
         orig_data = apply_wedge(ow_data, ld1=0, ld2=1) + apply_wedge(iw_data, ld1 = 1, ld2=0)
-        orig_data = normalize(orig_data, percentile = settings.normalize_percentile)
+        # orig_data = normalize(orig_data, percentile = settings.normalize_percentile)
     else:
         orig_data = ow_data
 

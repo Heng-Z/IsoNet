@@ -23,8 +23,8 @@ def predict(settings):
     for i,mrc in enumerate(settings.mrc_list + settings.mrc_list[:append_number]):
         root_name = mrc.split('/')[-1].split('.')[0]
         with mrcfile.open('{}/{}_iter00.mrc'.format(settings.result_dir,root_name)) as mrcData:
-            real_data = mrcData.data.astype(np.float32)*-1
-        real_data=normalize(real_data, percentile = settings.normalize_percentile)
+            real_data = mrcData.data.astype(np.float32)
+        # real_data=normalize(real_data, percentile = settings.normalize_percentile)
 
         cube_size = real_data.shape[0]
         pad_size1 = (settings.predict_cropsize - cube_size)//2
@@ -47,9 +47,9 @@ def predict(settings):
                     root_name = m_name.split('/')[-1].split('.')[0]
                     end_size = pad_size1+cube_size
                     outData1 = outData[pad_size1:end_size, pad_size1:end_size, pad_size1:end_size]
-                    outData1 = normalize(outData1, percentile = settings.normalize_percentile)
+                    # outData1 = normalize(outData1, percentile = settings.normalize_percentile)
                     with mrcfile.new('{}/{}_iter{:0>2d}.mrc'.format(settings.result_dir,root_name,settings.iter_count), overwrite=True) as output_mrc:
-                        output_mrc.set_data(-outData1)
+                        output_mrc.set_data(outData1)
             data = []
     K.clear_session()
     

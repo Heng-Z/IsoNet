@@ -89,8 +89,8 @@ def predict_one(args,one_tomo,model,output_file=None):
     logging.info('predicting:{}'.format(root_name))
 
     with mrcfile.open(one_tomo) as mrcData:
-        real_data = mrcData.data.astype(np.float32)*-1
-    real_data = normalize(real_data,percentile=args.normalize_percentile)
+        real_data = mrcData.data.astype(np.float32)
+    real_data = normalize(-real_data,percentile=args.normalize_percentile)
     data=np.expand_dims(real_data,axis=-1)
     reform_ins = reform3D(data)
     data = reform_ins.pad_and_crop_new(args.cube_size,args.crop_size)
@@ -115,8 +115,8 @@ def predict_one(args,one_tomo,model,output_file=None):
 
     outData=reform_ins.restore_from_cubes_new(outData.reshape(outData.shape[0:-1]), args.cube_size, args.crop_size)
 
-    outData = normalize(outData,percentile=args.normalize_percentile)
+    outData = normalize(-outData,percentile=args.normalize_percentile)
     with mrcfile.new(output_file, overwrite=True) as output_mrc:
-        output_mrc.set_data(-outData)
+        output_mrc.set_data(outData)
     logging.info('Done predicting')
     # predict(args.model,args.weight,args.mrc_file,args.output_file, cubesize=args.cubesize, cropsize=args.cropsize, batch_size=args.batch_size, gpuID=args.gpuID, if_percentile=if_percentile)
