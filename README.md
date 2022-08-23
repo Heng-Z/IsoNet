@@ -1,3 +1,7 @@
+# Notice
+IsoNet is now transferred to https://github.com/IsoNet-cryoET/IsoNet you can find the latest version there.
+This is my personal copy of IsoNet.
+
 # Isotropic Reconstruction of Electron Tomograms with Deep Learning
 # IsoNet version 0.2
 
